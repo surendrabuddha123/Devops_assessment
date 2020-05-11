@@ -1,0 +1,4 @@
+docker network create --driver bridge test
+docker run --name master-db --network test -p 15432:15432 -e POSTGRESQL_REPLICATION_MODE=master -e POSTGRESQL_REPLICATION_USER=my_repl_user -e POSTGRESQL_REPLICATION_PASSWORD=my_repl_password -e POSTGRESQL_USERNAME=myuser -e POSTGRES_HOST_AUTH_METHOD=trust -e POSTGRESQL_DATABASE=test -e PGDATA=/var/lib/postgresql/data/pgdata -v /custom/mount:/var/lib/postgresql/data postgres:latest
+docker run --name replica-db --network test -p 15433:15433 --link master-db:master -e POSTGRESQL_REPLICATION_MODE=slave -e POSTGRESQL_MASTER_HOST=master -e POSTGRESQL_MASTER_PORT_NUMBER=15432 -e POSTGRESQL_REPLICATION_USER=my_repl_user -e POSTGRESQL_REPLICATION_PASSWORD=my_repl_password -e POSTGRESQL_USERNAME=myuser -e POSTGRES_HOST_AUTH_METHOD=trust -e POSTGRESQL_DATABASE=test -e PGDATA=/var/lib/postgresql/data/pgdata -v /custom/mount:/var/lib/postgresql/data postgres:latest
+docker exec replica-db touch /tmp/postgres.trigger.15432
